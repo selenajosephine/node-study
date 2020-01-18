@@ -1,14 +1,19 @@
-var chalk = require('chalk');
+const chalk = require('chalk');
+var yargs = require('yargs').argv;
 var notes = require('./notes');
-console.log(notes.getNotes());
+var command = process.argv[2].toUpperCase();
+console.log(process.argv);
+console.log('yargs', yargs);
+console.log(yargs.title);
 
-console.log(chalk.red("Success"));
-console.log(chalk.green("Success in green"));
-console.log(chalk.blue.bgRed.bold('Hello world!'))
-
-/** 
- * Reference code for importing new modules
- */
-// var utils = require('./test1.js');
-// var sum = utils.add(2, 3);
-// console.log(sum);
+switch (command) {
+    case "ADD":
+        console.log("inside add");
+        break;
+    case "REMOVE":
+        console.log("inside remove");
+        break;
+    default:
+        console.log("Try again");
+        break;
+}
