@@ -30,11 +30,11 @@ const argv = require('yargs')
             type: 'string'
         }
     }, (argv) => {
-        console.log(argv.title);
+        notes.removeNotes(argv.title);
     })
     // register command - list to CLI 
     .command('list', 'List the notes', () => {
-        console.log('listing the notes');
+        notes.getNotes();
     })
     // register command - read to CLI 
     .command('read', 'Read a note', {
@@ -44,7 +44,7 @@ const argv = require('yargs')
             type: 'string'
         }
     }, (argv) => {
-        console.log('reading note with title' + argv.title)
+        notes.readNote(argv.title);
     })
     .help('h')
     .alias('h', 'help')
