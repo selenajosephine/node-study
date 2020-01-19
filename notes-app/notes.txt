@@ -1,1 +1,0 @@
-This file was created by nodejs written by Selenaand this is text appended by code

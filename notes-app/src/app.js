@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const notes = require('./notes')
+
 const argv = require('yargs')
     // register command - add to CLI 
     // command name, command description, builder properties, handler function
@@ -18,8 +20,7 @@ const argv = require('yargs')
             type: 'string'
         }
     }, (argv) => {
-        console.log("title : " + argv.title);
-        console.log("note content: " + argv.body);
+        notes.addNotes(argv.title, argv.body);
     })
     // register command - remove to CLI 
     .command('remove', 'Delete a note', {
