@@ -1,20 +1,13 @@
+var path = require('path');
 var express = require('express');
 var app = express();
 
-app.get("/", (req, res) => {
-    res.send("Hello World")
-});
+const publicDirectoryPath = path.join(__dirname, '../public');
 
-app.get("/help", (req, res) => {
-    res.send("Help Page")
-});
+app.use(express.static(publicDirectoryPath));
 
-app.get("/about", (req, res) => {
-    res.send("About page")
-});
-
-app.get("/showweather", (req, res) => {
-    res.send("Your Weather")
+app.get("/weather", (req, res) => {
+    res.send({ location: "Philadelphia", forecast: "mostly sunny" })
 })
 
 app.listen(3000, () => {
