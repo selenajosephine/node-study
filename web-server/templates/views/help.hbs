@@ -2,15 +2,19 @@
 <html>
 
 <head>
+    <title>{{title}}</title>
+    <link rel="icon" href="./assets/img/weather.png">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
-    {{>headers}}
-    <p>
-        {{content}}
-    </p>
-      {{>footer}}
+    <div class="main-content">
+        {{>headers}}
+        <p>
+            {{content}}
+        </p>
+    </div>
+    {{>footer}}
 </body>
 
 </html>

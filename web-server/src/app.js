@@ -34,14 +34,29 @@ app.get("/about", (req, res) => {
 
 app.get("/help", (req, res) => {
     res.render("help", {
-        title: "Help",
-        content: "This is some helpful message",
+        title: "Help article",
         name: 'Selena'
     })
 })
 
+app.get('/help/*', (req, res) => {
+    res.render("pagenotfound", {
+        title: "404",
+        name: 'Selena',
+        errorMessage:'Help article not found'
+    });
+})
+
 app.get("/weather", (req, res) => {
     res.send({ location: "Philadelphia", forecast: "mostly sunny" })
+})
+
+app.get('*', (req, res) => {
+    res.render("pagenotfound", {
+        title: "404",
+        name: 'Selena',
+        errorMessage: 'page not found'
+    });
 })
 
 app.listen(3000, () => { console.log('Server is up at 3000') });
