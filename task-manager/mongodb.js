@@ -1,7 +1,10 @@
 // CRUD - Create, Read, Update and Delete
-const mongodb = require('mongodb');
-const MongoClient = mongodb.MongoClient;
+const { MongoClient, ObjectID } = require('mongodb');
 
+const id = new ObjectID();
+console.log(id.id.length);
+console.log(id.toHexString().length);
+console.log(id.getTimestamp());
 const connectionURL = 'mongodb://localhost :27017';
 const databaseName = 'task-manager';
 
@@ -12,8 +15,9 @@ MongoClient.connect(connectionURL, { useNewUrlParser: true, useUnifiedTopology: 
     }
     const db = client.db(databaseName);
     // db.collection('users').insertOne({
-    //     name: 'Selena',
-    //     age: 24
+    //     name: 'Selena Josephine Ponmani',
+    //     age: 24,
+    //     _id: id
     // },(err,data)=>{
     //     if(err){
     //         return console.log('err',err);
@@ -37,26 +41,28 @@ MongoClient.connect(connectionURL, { useNewUrlParser: true, useUnifiedTopology: 
     //     console.log(result.ops);
     // })
 
-    db.collection('task').insertMany([
-        {
-            description: 'Driving lessons',
-            completed: true
-        },
-        {
-            description: 'Clean the house',
-            completed: false
-        },
-        {
-            description: 'Mop the floor',
-            completed: true
-        }
-    ], (err, result) => {
-        if (err) {
-            return console.log('error encountered');
-        }
-        console.log(result.ops);
-        
-    })
+    // this inserts many tasks
+    // db.collection('task').insertMany([
+    //     {
+    //         description: 'Driving lessons',
+    //         completed: true
+    //     },
+    //     {
+    //         description: 'Clean the house',
+    //         completed: false
+    //     },
+    //     {
+    //         description: 'Mop the floor',
+    //         completed: true
+    //     }
+    // ], (err, result) => {
+    //     if (err) {
+    //         return console.log('error encountered');
+    //     }
+    //     console.log(result.ops);
+    // })
+
+
 });
 
 
