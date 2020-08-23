@@ -3,6 +3,9 @@ const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
 const Filter = require('bad-words');
+const {
+    generateMessage, generateLocationMessage
+} = require('./utils/messageutils');
 
 const app = express();
 // express library does it behind the scenes anyway. 
@@ -17,27 +20,30 @@ app.use(express.static(publicDirectoryPath));
 
 io.on('connection', (socket) => {
     console.log('new web socket connection established');
-    socket.emit('message', 'welcome');
-    socket.broadcast.emit('message', 'New User has joined');
+
+    socket.emit('message', generateMessage('Welcome'));
+
+    socket.broadcast.emit('message', generateMessage('A New User bas joined'));
+
     socket.on('sendMessage', (message, callback) => {
         const filter = new Filter();
         if (filter.isProfane(message)) {
             return callback('Profanity is not allowed');
         }
+        io.emit('message', generateMessage(message));
+        callback();
+    });
 
-        io.emit('message', message);
-        callback();
-    });
     socket.on('sendLocation', ({ latitude, longitude }, callback) => {
-        socket.broadcast.emit('message', `https://google.com/maps?q=${latitude},${longitude}`);
+        socket.broadcast.emit('locationMessage', generateLocationMessage(`https://google.com/maps?q=${latitude},${longitude}`));
         callback();
     });
+
+
     socket.on('disconnect', () => {
-        io.emit('message', 'A use has left');
+        io.emit('message', generateMessage('A User left'));
     })
 });
 
 
-server.listen(port, () => {
-    console.log('express server has started');
-});
+server.listen(port, () => console.log('express server running on port 3000'));

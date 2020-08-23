@@ -8,13 +8,30 @@ const $messageForm = document.querySelector('#message-form');
 const $messageFormInput = $messageForm.querySelector('input');
 const $messageFormButton = $messageForm.querySelector('button');
 const $locationButton = document.querySelector('#send-location');
+const $messages = document.querySelector('#messages');
 
-socket.on('message', (message) => console.log(message));
+// Templates
+const messageTemplate = document.querySelector('#message-template').innerHTML;
+const locationTemplate = document.querySelector('#location-template').innerHTML;
+
+socket.on('message', (message) => {
+    const html = Mustache.render(messageTemplate, {
+        message: message.text,
+        createdAt: moment(message.createdAt).format('h:mm a')
+    });
+    $messages.insertAdjacentHTML('beforeend', html)
+})
+
+socket.on('locationMessage', (url) => {
+    const locationHtml = Mustache.render(locationTemplate, { url: url.url, createdAt: moment(url.createdAt).format('h:mm a') });
+    $messages.insertAdjacentHTML('beforeend', locationHtml);
+});
+
 $messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
     // disable  button
     $messageFormButton.setAttribute('disabled', 'disabled');
-    socket.emit('sendMessage', $messageFormInput, (error) => {
+    socket.emit('sendMessage', document.getElementById('message').value, (error) => {
         // enable button and reset field
         $messageFormButton.removeAttribute('disabled');
         $messageFormInput.value = '';
@@ -35,7 +52,6 @@ $locationButton.addEventListener('click', () => {
         const { coords: { latitude, longitude } } = position;
         socket.emit('sendLocation', { latitude, longitude }, () => {
             $locationButton.removeAttribute('disabled');
-            console.log('Location shared!');
         });
     });
 })
