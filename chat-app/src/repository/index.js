@@ -1,7 +1,7 @@
 const { MongoClient, ObjectID } = require('mongodb');
 const LOGGER = require('../utils/logger/Logger');
 
-const connectionURL = 'mongodb://localhost :27017';
+const connectionURL = 'mongodb://localhost:27017';
 
 const getConnection = () => {
     return new Promise((resolve, reject) => {
@@ -11,7 +11,7 @@ const getConnection = () => {
             poolSize: 10
         }, (err, client) => {
             if (err) {
-                LOGGER.INFO('Unable to connect to the database');
+                LOGGER.INFO('Unable to connect to Database');
                 LOGGER.ERROR(err);
                 reject(err);
             }

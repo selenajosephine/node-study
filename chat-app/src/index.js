@@ -1,13 +1,16 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
+
+const LOGGER = require('./utils/logger/Logger');
+
 const socketio = require('socket.io');
 const Filter = require('bad-words');
 const {
     generateMessage, generateLocationMessage
 } = require('./utils/messageutils');
 
-const { userservice: { findOneUser } } = require('./services');
+const { userservice } = require('./services');
 
 const app = express();
 // express library does it behind the scenes anyway. 
@@ -21,18 +24,18 @@ const publicDirectoryPath = path.join(__dirname, '../public');
 app.use(express.static(publicDirectoryPath));
 
 io.on('connection', (socket) => {
-    console.log('new web socket connection established');
+    LOGGER.INFO('New Socket Connection Established');
 
-    socket.on('join', ({ username, room }) => {
-        console.log('username::', username);
-        findOneUser(username);
-        console.log('inside room');
+    socket.on('join', async ({ buyer, room, seller }) => {
+        console.log(room);
+        // await userservice.addUserIfUserDoesNotPreExist({ username });
+        await userservice.addUsersToRoom({ buyer, room, seller });
         socket.join(room);
         // socket.emit, io.emit, socket.broadcast.emit
         // io.to.emit, socket.broadcast.to.emit
 
-        socket.emit('message', generateMessage('Welcome'));
-        socket.broadcast.to(room).emit('message', generateMessage(`${username} has joined`));
+        // socket.emit('message', generateMessage(`You have now connected with ${seller} `));
+        socket.broadcast.to(room).emit('message', generateMessage(`${buyer} has joined`));
 
     });
 
@@ -41,7 +44,7 @@ io.on('connection', (socket) => {
         if (filter.isProfane(message)) {
             return callback('Profanity is not allowed');
         }
-        io.to('Sel').emit('message', generateMessage(message));
+        io.to('eee_sel_josephine').emit('message', generateMessage(message));
         callback();
     });
 
@@ -56,5 +59,5 @@ io.on('connection', (socket) => {
 });
 
 
-server.listen(port, () => console.log('express server running on port 3000'));
+server.listen(port, () => LOGGER.INFO('express server running on port 3000'));
 
