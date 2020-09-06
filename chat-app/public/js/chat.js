@@ -15,11 +15,12 @@ const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationTemplate = document.querySelector('#location-template').innerHTML;
 
 // Options
-const { buyer, room, seller } = Qs.parse(location.search, { ignoreQueryPrefix: true });
-socket.on('message', (message) => {
+const { from, room, to } = Qs.parse(location.search, { ignoreQueryPrefix: true });
+socket.on('message', ({ from, message }) => {
     const html = Mustache.render(messageTemplate, {
         message: message.text,
-        createdAt: moment(message.createdAt).format('h:mm a')
+        createdAt: moment(message.createdAt).format('h:mm a'),
+        from
     });
     $messages.insertAdjacentHTML('beforeend', html)
 })
@@ -33,7 +34,7 @@ $messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
     // disable  button
     $messageFormButton.setAttribute('disabled', 'disabled');
-    socket.emit('sendMessage', document.getElementById('message').value, (error) => {
+    socket.emit('sendMessage', document.getElementById('message').value, { from, room, to }, (error) => {
         // enable button and reset field
         $messageFormButton.removeAttribute('disabled');
         $messageFormInput.value = '';
@@ -58,4 +59,4 @@ $locationButton.addEventListener('click', () => {
     });
 })
 
-socket.emit("join", { buyer, room, seller })
+socket.emit("join", { from, room, to })

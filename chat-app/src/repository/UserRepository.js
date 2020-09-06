@@ -81,25 +81,34 @@ const getUser = async (username) => {
     }
 }
 
-const addUsersToRoom = async ({ buyer, room, seller }) => {
+const addUsersToRoom = async ({ from , room, to }) => {
     // Clean the Data
-    buyer = dataCleanser.trimAndCleanseData(buyer);
+    from = dataCleanser.trimAndCleanseData(from);
     room = dataCleanser.trimAndCleanseData(room);
-    seller = dataCleanser.trimAndCleanseData(seller);
+    to = dataCleanser.trimAndCleanseData(to);
 
+    const reverseRoom = room.split('_');
+    const temp = reverseRoom[2];
+    reverseRoom[2] = reverseRoom[1];
+    reverseRoom[1] = temp;
+    const reversedString = reverseRoom.join('_');
+    
     // validate fields
-    if (dataCleanser.checkValidity([buyer, room, seller])) {
+    if (dataCleanser.checkValidity([from, room, to, reversedString])) {
         // get Database Connection
         const conn = await databaseUtils.getConnection();
         const db = conn.db(databaseConstants.CHAT_DATABASE);
-
+        const results = await db.collection(databaseConstants.CHAT_ROOMS_COLLECTION).findOne(
+            { _id: reversedString }
+        );
+        if (results.length > 0) {
+            return "Room already exists";
+        }
         await db.collection(databaseConstants.CHAT_ROOMS_COLLECTION).updateOne(
             { _id: room },
-            { $setOnInsert: { _id: room, buyer, seller } },
+            { $setOnInsert: { _id: room, from, to } },
             { upsert: true },
         );
-
-
     }
 
 }

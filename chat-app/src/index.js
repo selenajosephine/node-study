@@ -10,7 +10,7 @@ const {
     generateMessage, generateLocationMessage
 } = require('./utils/messageutils');
 
-const { userservice } = require('./services');
+const { userservice, messageservice } = require('./services');
 
 const app = express();
 // express library does it behind the scenes anyway. 
@@ -26,25 +26,22 @@ app.use(express.static(publicDirectoryPath));
 io.on('connection', (socket) => {
     LOGGER.INFO('New Socket Connection Established');
 
-    socket.on('join', async ({ buyer, room, seller }) => {
-        console.log(room);
-        // await userservice.addUserIfUserDoesNotPreExist({ username });
-        await userservice.addUsersToRoom({ buyer, room, seller });
+    socket.on('join', async ({ from, room, to }) => {
+        await userservice.addUsersToRoom({ from, room, to });
         socket.join(room);
-        // socket.emit, io.emit, socket.broadcast.emit
-        // io.to.emit, socket.broadcast.to.emit
 
         // socket.emit('message', generateMessage(`You have now connected with ${seller} `));
-        socket.broadcast.to(room).emit('message', generateMessage(`${buyer} has joined`));
+        socket.broadcast.to(room).emit('message', generateMessage(`${from} has joined`));
 
     });
 
-    socket.on('sendMessage', (message, callback) => {
+    socket.on('sendMessage', async (message, { from, room, to }, callback) => {
         const filter = new Filter();
         if (filter.isProfane(message)) {
             return callback('Profanity is not allowed');
         }
-        io.to('eee_sel_josephine').emit('message', generateMessage(message));
+        await messageservice.addNewMessageInRoom({ from, room, to, message });
+        io.to('eee_sel_josephine').emit('message', {from, to, message: generateMessage(message)});
         callback();
     });
 

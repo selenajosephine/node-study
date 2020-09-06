@@ -23,5 +23,7 @@ const getConnection = () => {
 
 
 module.exports = {
-    getConnection, userRepository: require('./UserRepository')
+    getConnection,
+    userRepository: require('./UserRepository'),
+    messageRepository: require('./MessageRepository')
 }
