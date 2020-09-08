@@ -14,6 +14,29 @@ const $messages = document.querySelector('#messages');
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationTemplate = document.querySelector('#location-template').innerHTML;
 
+const autoscroll = () => {
+    // New message element
+    const $newMessage = $messages.lastElementChild;
+
+    // Height of the new message
+    const newMessageStyles = getComputedStyle($newMessage);
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin
+
+    // visible height
+    const visibleHeight = $messages.offsetHeight;
+
+    // height of messages container
+    const containerHeight = $messages.scrollHeight;
+
+    // How far have I scrolled
+    const scrollOffset = $messages.scrollTop + visibleHeight;
+
+    if (containerHeight - newMessageHeight <= scrollOffset) {
+        $messages.scrollTop = $messages.scrollHeight;
+    }
+}
+
 // Options
 const { from, room, to } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 socket.on('message', ({ from, message }) => {
@@ -22,12 +45,14 @@ socket.on('message', ({ from, message }) => {
         createdAt: moment(message.createdAt).format('h:mm a'),
         from
     });
-    $messages.insertAdjacentHTML('beforeend', html)
+    $messages.insertAdjacentHTML('beforeend', html);
+    autoscroll();
 })
 
-socket.on('locationMessage', (url) => {
-    const locationHtml = Mustache.render(locationTemplate, { url: url.url, createdAt: moment(url.createdAt).format('h:mm a') });
+socket.on('locationMessage', ({ from, to, url }) => {
+    const locationHtml = Mustache.render(locationTemplate, { url: url.url, createdAt: moment(url.createdAt).format('h:mm a'), from });
     $messages.insertAdjacentHTML('beforeend', locationHtml);
+    autoscroll();
 });
 
 $messageForm.addEventListener('submit', (e) => {
@@ -53,7 +78,7 @@ $locationButton.addEventListener('click', () => {
     $locationButton.setAttribute('disabled', 'disabled');
     navigator.geolocation.getCurrentPosition((position) => {
         const { coords: { latitude, longitude } } = position;
-        socket.emit('sendLocation', { latitude, longitude }, () => {
+        socket.emit('sendLocation', { latitude, longitude, from, room, to }, () => {
             $locationButton.removeAttribute('disabled');
         });
     });

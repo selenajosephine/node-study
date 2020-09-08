@@ -18,10 +18,8 @@ const addNewMessage = async ({ from, room, to, message }) => {
         try {
             // Add database with message
             const results = await db.collection(databaseConstants.CHAT_MESSAGES).insertOne({
-                room,
-                from,
-                to,
-                createdDate: new Date()
+                room, from, to,
+                message, createdDate: new Date()
             });
             return !!(results.result.ok === 1);
         }

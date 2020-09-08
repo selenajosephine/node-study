@@ -27,11 +27,14 @@ io.on('connection', (socket) => {
     LOGGER.INFO('New Socket Connection Established');
 
     socket.on('join', async ({ from, room, to }) => {
-        await userservice.addUsersToRoom({ from, room, to });
-        socket.join(room);
+        const { error, results } = await userservice.addUsersToRoom({ from, room, to });
+        if (error) {
 
-        // socket.emit('message', generateMessage(`You have now connected with ${seller} `));
-        socket.broadcast.to(room).emit('message', generateMessage(`${from} has joined`));
+        }
+        socket.join(room);
+        socket.broadcast.to(room).emit('message', {
+            from: 'Admin', to, message: generateMessage(`${from} has joined`)
+        });
 
     });
 
@@ -41,17 +44,21 @@ io.on('connection', (socket) => {
             return callback('Profanity is not allowed');
         }
         await messageservice.addNewMessageInRoom({ from, room, to, message });
-        io.to('eee_sel_josephine').emit('message', {from, to, message: generateMessage(message)});
+        io.to(room).emit('message', { from, to, message: generateMessage(message) });
         callback();
     });
 
-    socket.on('sendLocation', ({ latitude, longitude }, callback) => {
-        socket.broadcast.emit('locationMessage', generateLocationMessage(`https://google.com/maps?q=${latitude},${longitude}`));
+    socket.on('sendLocation', async ({ latitude, longitude, from, room, to }, callback) => {
+        io.to(room).emit('locationMessage', { from, to, url: generateLocationMessage(`https://google.com/maps?q=${latitude},${longitude}`) });
+        await messageservice.addNewMessageInRoom({ from, room, to, message: url });
         callback();
     });
 
     socket.on('disconnect', () => {
-        io.emit('message', generateMessage('A User left'));
+        io.emit('message', {
+            from: 'Admin',
+            message: generateMessage(`A user left`)
+        });
     })
 });
 
