@@ -1,5 +1,5 @@
 const { MongoClient, ObjectID } = require('mongodb');
-const LOGGER = require('../utils/logger/Logger');
+const { LOGGER } = require('../utils/logger/Logger');
 
 const connectionURL = 'mongodb://localhost:27017';
 
@@ -24,6 +24,6 @@ const getConnection = () => {
 
 module.exports = {
     getConnection,
-    userRepository: require('./UserRepository'),
-    messageRepository: require('./MessageRepository')
+    userRepository: require('./user.repository'),
+    messageRepository: require('./message.repository')
 }

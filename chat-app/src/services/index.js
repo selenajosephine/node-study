@@ -1,4 +1,4 @@
 module.exports = {
-    userservice: require('./UserService'),
-    messageservice: require('./MessageService')
+    userservice: require('./user.service'),
+    messageservice: require('./message.service')
 }

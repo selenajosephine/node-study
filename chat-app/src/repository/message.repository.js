@@ -1,13 +1,14 @@
-const LOGGER = require('../utils/logger/Logger');
-const { dataCleanser } = require('../utils/data-processor');
+const { LOGGER, dataprocessor: { dataCleanser } } = require('../utils');
 const { databaseUtils, databaseConstants } = require('./database-utils');
 
 const addNewMessage = async ({ from, room, to, message }) => {
+    LOGGER.INFO('Adding a new message to Database');
+
     // Clean the Data
     from = dataCleanser.trimAndCleanseData(from);
     room = dataCleanser.trimAndCleanseData(room);
     to = dataCleanser.trimAndCleanseData(to);
-    message = dataCleanser.trimAndCleanseData(message);
+    message = dataCleanser.trimAndCleanseData(message.url);
 
     // validate fields
     if (dataCleanser.checkValidity([from, room, to, message])) {
@@ -21,6 +22,7 @@ const addNewMessage = async ({ from, room, to, message }) => {
                 room, from, to,
                 message, createdDate: new Date()
             });
+            LOGGER.INFO(`message insertion status is ${!!(results.result.ok === 1)}`);
             return !!(results.result.ok === 1);
         }
         catch (err) { LOGGER.ERROR(err); }

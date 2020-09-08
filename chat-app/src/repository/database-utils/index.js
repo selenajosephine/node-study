@@ -1,4 +1,4 @@
 module.exports = {
-    databaseUtils: require('./DatabaseUtils'),
-    databaseConstants: require('./DatabaseConstants')
+    databaseUtils: require('./database.utils'),
+    databaseConstants: require('./database.constants')
 }
