@@ -16,34 +16,26 @@ public class AgentRiskFlagConfigTest {
 
     @Test
     public void testLowRiskFlagActionList() {
-        AgentRiskFlagConfig agentRiskFlagConfig = new AgentRiskFlagConfig();
-
         // Test default value
         assertNotNull(agentRiskFlagConfig.getLowRiskFlagActionList());
 
         // Test setter and getter
-        List<String> lowRiskActions = Arrays.asList("Action1", "Action2");
-        agentRiskFlagConfig.setLowRiskFlagActionList(lowRiskActions);
-        assertEquals(lowRiskActions, agentRiskFlagConfig.getLowRiskFlagActionList());
+        agentRiskFlagConfig.setLowRiskFlagActionList(Arrays.asList("Action1", "Action2"));
+        assertEquals(Arrays.asList("Action1", "Action2"), agentRiskFlagConfig.getLowRiskFlagActionList());
     }
 
     @Test
     public void testHighRiskFlagActionList() {
-        AgentRiskFlagConfig agentRiskFlagConfig = new AgentRiskFlagConfig();
-
         // Test default value
         assertNotNull(agentRiskFlagConfig.getHighRiskFlagActionList());
 
         // Test setter and getter
-        List<String> highRiskActions = Arrays.asList("Action3", "Action4");
-        agentRiskFlagConfig.setHighRiskFlagActionList(highRiskActions);
-        assertEquals(highRiskActions, agentRiskFlagConfig.getHighRiskFlagActionList());
+        agentRiskFlagConfig.setHighRiskFlagActionList(Arrays.asList("Action3", "Action4"));
+        assertEquals(Arrays.asList("Action3", "Action4"), agentRiskFlagConfig.getHighRiskFlagActionList());
     }
 
     @Test
     public void testNullLowRiskFlagActionList() {
-        AgentRiskFlagConfig agentRiskFlagConfig = new AgentRiskFlagConfig();
-
         // Test null lowRiskFlagActionList
         agentRiskFlagConfig.setLowRiskFlagActionList(null);
         assertNotNull(agentRiskFlagConfig.getLowRiskFlagActionList());
@@ -51,8 +43,6 @@ public class AgentRiskFlagConfigTest {
 
     @Test
     public void testNullHighRiskFlagActionList() {
-        AgentRiskFlagConfig agentRiskFlagConfig = new AgentRiskFlagConfig();
-
         // Test null highRiskFlagActionList
         agentRiskFlagConfig.setHighRiskFlagActionList(null);
         assertNotNull(agentRiskFlagConfig.getHighRiskFlagActionList());
@@ -60,8 +50,6 @@ public class AgentRiskFlagConfigTest {
 
     @Test
     public void testBothNullLists() {
-        AgentRiskFlagConfig agentRiskFlagConfig = new AgentRiskFlagConfig();
-
         // Test null lowRiskFlagActionList and highRiskFlagActionList
         agentRiskFlagConfig.setLowRiskFlagActionList(null);
         agentRiskFlagConfig.setHighRiskFlagActionList(null);
