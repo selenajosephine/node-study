@@ -1,60 +1,62 @@
-Copy code
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+@RunWith(MockitoJUnitRunner.class)
+public class AskAmexRelinquishControlUtilTest {
 
-@RunWith(SpringRunner.class)
-public class AgentRiskFlagConfigTest {
+    @InjectMocks
+    private AskAmexRelinquishControlUtil askAmexRelinquishControlUtil;
+
+    @Mock
+    private LoganMessage loganMessage;
+
+    @Mock
+    private Logger logger;
+
+    @Value("${mobile.messageexpiry.timeout.seconds}")
+    private String mobileTimeoutExpirySeconds;
+
+    @Value("${mobile.messageexpiry.userrequested.timeunit}")
+    private String mobileUserRequestElapsedUnit;
 
     @Test
-    public void testLowRiskFlagActionList() {
-        // Test default value
-        assertNotNull(agentRiskFlagConfig.getLowRiskFlagActionList());
+    public void testIsBotAutomatedMessageWhenConditionsMet() {
+        // Mocking the necessary properties in LoganMessage
+        when(loganMessage.getProperties()).thenReturn(someMockedProperties());
 
-        // Test setter and getter
-        agentRiskFlagConfig.setLowRiskFlagActionList(Arrays.asList("Action1", "Action2"));
-        assertEquals(Arrays.asList("Action1", "Action2"), agentRiskFlagConfig.getLowRiskFlagActionList());
+        // Set up the conditions for a bot automated message
+        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.MESSAGE_ORIGIN)).thenReturn(MessageSource.BOT.getDbValue());
+        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.BOT_ID)).thenReturn("someBotId");
+        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.SURVEY_ID)).thenReturn(null);
+
+        // Call the method and assert
+        assertTrue(askAmexRelinquishControlUtil.isBotAutomatedMessage(loganMessage));
     }
 
     @Test
-    public void testHighRiskFlagActionList() {
-        // Test default value
-        assertNotNull(agentRiskFlagConfig.getHighRiskFlagActionList());
+    public void testIsBotAutomatedMessageWhenConditionsNotMet() {
+        // Mocking the necessary properties in LoganMessage
+        when(loganMessage.getProperties()).thenReturn(someMockedProperties());
 
-        // Test setter and getter
-        agentRiskFlagConfig.setHighRiskFlagActionList(Arrays.asList("Action3", "Action4"));
-        assertEquals(Arrays.asList("Action3", "Action4"), agentRiskFlagConfig.getHighRiskFlagActionList());
+        // Set up the conditions for a non-bot automated message
+        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.MESSAGE_ORIGIN)).thenReturn("someOtherSource");
+        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.BOT_ID)).thenReturn("someBotId");
+        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.SURVEY_ID)).thenReturn("someSurveyId");
+
+        // Call the method and assert
+        assertFalse(askAmexRelinquishControlUtil.isBotAutomatedMessage(loganMessage));
     }
 
-    @Test
-    public void testNullLowRiskFlagActionList() {
-        // Test null lowRiskFlagActionList
-        agentRiskFlagConfig.setLowRiskFlagActionList(null);
-        assertNotNull(agentRiskFlagConfig.getLowRiskFlagActionList());
-    }
-
-    @Test
-    public void testNullHighRiskFlagActionList() {
-        // Test null highRiskFlagActionList
-        agentRiskFlagConfig.setHighRiskFlagActionList(null);
-        assertNotNull(agentRiskFlagConfig.getHighRiskFlagActionList());
-    }
-
-    @Test
-    public void testBothNullLists() {
-        // Test null lowRiskFlagActionList and highRiskFlagActionList
-        agentRiskFlagConfig.setLowRiskFlagActionList(null);
-        agentRiskFlagConfig.setHighRiskFlagActionList(null);
-
-        assertNotNull(agentRiskFlagConfig.getLowRiskFlagActionList());
-        assertNotNull(agentRiskFlagConfig.getHighRiskFlagActionList());
+    private Map<String, String> someMockedProperties() {
+        // Implement a method to return mocked properties map if needed
     }
 }
