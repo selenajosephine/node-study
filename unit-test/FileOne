@@ -1,62 +1,104 @@
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AskAmexRelinquishControlUtilTest {
-
-    @InjectMocks
-    private AskAmexRelinquishControlUtil askAmexRelinquishControlUtil;
+public class RestUtilTest {
 
     @Mock
-    private LoganMessage loganMessage;
+    private RestTemplate restTemplate;
 
-    @Mock
-    private Logger logger;
-
-    @Value("${mobile.messageexpiry.timeout.seconds}")
-    private String mobileTimeoutExpirySeconds;
-
-    @Value("${mobile.messageexpiry.userrequested.timeunit}")
-    private String mobileUserRequestElapsedUnit;
-
-    @Test
-    public void testIsBotAutomatedMessageWhenConditionsMet() {
-        // Mocking the necessary properties in LoganMessage
-        when(loganMessage.getProperties()).thenReturn(someMockedProperties());
-
-        // Set up the conditions for a bot automated message
-        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.MESSAGE_ORIGIN)).thenReturn(MessageSource.BOT.getDbValue());
-        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.BOT_ID)).thenReturn("someBotId");
-        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.SURVEY_ID)).thenReturn(null);
-
-        // Call the method and assert
-        assertTrue(askAmexRelinquishControlUtil.isBotAutomatedMessage(loganMessage));
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        RestUtil.setRestTemplate(restTemplate);
     }
 
     @Test
-    public void testIsBotAutomatedMessageWhenConditionsNotMet() {
-        // Mocking the necessary properties in LoganMessage
-        when(loganMessage.getProperties()).thenReturn(someMockedProperties());
+    public void testBuildEntity() {
+        // Given
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Accept", "application/json");
 
-        // Set up the conditions for a non-bot automated message
-        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.MESSAGE_ORIGIN)).thenReturn("someOtherSource");
-        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.BOT_ID)).thenReturn("someBotId");
-        when(loganMessage.getProperties().get(AskAmexRelinquishControlUtil.SURVEY_ID)).thenReturn("someSurveyId");
+        // When
+        HttpEntity<String> entity = RestUtil.buildEntity("requestBody", headers);
 
-        // Call the method and assert
-        assertFalse(askAmexRelinquishControlUtil.isBotAutomatedMessage(loganMessage));
+        // Then
+        HttpHeaders expectedHeaders = new HttpHeaders();
+        expectedHeaders.setContentType(MediaType.APPLICATION_JSON);
+        expectedHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> expectedEntity = new HttpEntity<>("requestBody", expectedHeaders);
+        assertEquals(expectedEntity, entity);
     }
 
-    private Map<String, String> someMockedProperties() {
-        // Implement a method to return mocked properties map if needed
+    @Test
+    public void testBuildEntityHeader() {
+        // Given
+        Map<String, String> headers = new HashMap<>();
+        headers.put("AmexSession", "session123");
+        headers.put("CORRELATION-ID", "correlation123");
+        headers.put("Accept", "application/json");
+
+        // When
+        HttpEntity<String> entity = RestUtil.buildEntityHeader(headers);
+
+        // Then
+        HttpHeaders expectedHeaders = new HttpHeaders();
+        expectedHeaders.add("AmexSession", "session123");
+        expectedHeaders.add("CORRELATION-ID", "correlation123");
+        expectedHeaders.add("Accept", "application/json");
+        assertEquals(expectedHeaders, entity.getHeaders());
+        assertEquals("", entity.getBody());
     }
+
+    @Test
+    public void testBuildResponseEntityForEligibility() {
+        // Given
+        GetEligibleResponse getEligibleResponse = new GetEligibleResponse();
+        String responseCode = "200";
+
+        // When
+        ResponseEntity<GetEligibleResponse> responseEntity = RestUtil.buildResponseEntityForEligibility(getEligibleResponse, responseCode);
+
+        // Then
+        HttpHeaders expectedHeaders = new HttpHeaders();
+        expectedHeaders.set("responseCode", "200");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(getEligibleResponse, responseEntity.getBody());
+        assertEquals(expectedHeaders, responseEntity.getHeaders());
+    }
+
+    @Test
+    public void testSendRequest() {
+        // Given
+        String url = "http://example.com";
+        HttpMethod method = HttpMethod.GET;
+        HttpEntity<String> requestEntity = new HttpEntity<>(HttpHeaders.EMPTY);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>("responseBody", HttpStatus.OK);
+
+        // Mock restTemplate behavior
+        when(restTemplate.exchange(url, method, requestEntity, String.class))
+                .thenReturn(responseEntity);
+
+        // When
+        ResponseEntity<String> response = RestUtil.sendRequest(url, method, requestEntity, String.class);
+
+        // Then
+        assertEquals(responseEntity, response);
+    }
+
+
 }
